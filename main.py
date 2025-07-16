@@ -1,5 +1,5 @@
 from typing import  Union, Annotated, Literal
-from fastapi import  FastAPI, Query, Path
+from fastapi import  FastAPI, Query, Path, Body
 from pydantic import BaseModel, AfterValidator, Field
 from enum import Enum
 
@@ -11,6 +11,10 @@ class Item(BaseModel):
     name: str
     price: float
     is_offer: Union[bool, None] = None
+
+class User(BaseModel):
+    username: str
+    full_name: str | None = None
 
 class ModelName(str, Enum):
     alexnet = "alexnet"
@@ -36,8 +40,8 @@ def read_item(
     return {"item_id": item_id, "q": q}
 
 @app.put("/items/{item_id}")
-def update_item(item_id: int, item:Item):
-    return {"item_name": item.price, "item_id": item_id}
+def update_item(item_id: int, item:Item, user: User, importance: Annotated[int, Body()]):
+    return {"item_name": item.price, "item_id": item_id, "user": user, "importance": importance}
 
 @app.get("/files/{file_path}")
 def read_file(file_path: str):
