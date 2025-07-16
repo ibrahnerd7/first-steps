@@ -3,6 +3,8 @@ from fastapi import  FastAPI
 from pydantic import BaseModel
 from enum import Enum
 
+from pygments.lexers import q
+
 app = FastAPI()
 
 class Item(BaseModel):
@@ -62,3 +64,24 @@ async def read_user_item(user_id: int, item_id: str, q:str = None, short: bool =
     if not short:
         item.update({"description": "This is an amazing item that has a long description"})
     return item
+
+class Item2(BaseModel):
+    name: str
+    description: str
+    price: float
+    tax: float | None = None
+
+@app.post("/items2/")
+async  def create_item(item:Item2):
+    item_dict = item.model_dump()
+    if item.tax is not None:
+        price_with_tax = item.price * item.tax
+        item_dict.update({"price_with_tax": price_with_tax})
+    return item_dict
+
+@app.put("/items2/{item_id}")
+async def update_item(item_id:int, item:Item2, q:str |None = None):
+    result = {"item_id": item_id, **item.dict()}
+    if q:
+        result.update({"q": q})
+    return result
