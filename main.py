@@ -1,6 +1,6 @@
-from typing import  Union, Annotated
+from typing import  Union, Annotated, Literal
 from fastapi import  FastAPI, Query, Path
-from pydantic import BaseModel, AfterValidator
+from pydantic import BaseModel, AfterValidator, Field
 from enum import Enum
 
 from pygments.lexers import q
@@ -114,3 +114,13 @@ async def read_books(
     else:
         id, item = random.choice(list(data.items()))
     return {"id": id, "item": item}
+
+class FilterParams(BaseModel):
+    model_config = {"etra", "forbid"}
+    limit: int = Field(100, gt=0, le=100)
+    offset: int = Field(0, gt=0)
+    order_by: Literal["price", "name"]
+    tags: list[str] = []
+@app.get("/items4/")
+async def read_items(filter_query: Annotated[FilterParams, Query()]):
+    return filter_query
