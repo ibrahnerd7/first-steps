@@ -1,5 +1,5 @@
 from typing import  Union, Annotated
-from fastapi import  FastAPI, Query
+from fastapi import  FastAPI, Query, Path
 from pydantic import BaseModel, AfterValidator
 from enum import Enum
 
@@ -30,7 +30,9 @@ async def get_model(model_name: ModelName):
     return {"model_name": model_name , "message": "Have some residuals"}
 
 @app.get("/items/{item_id}")
-def read_item(item_id: int, q:str | None = None):
+def read_item(
+        item_id: Annotated[int, Path(title="The ID of the item to get", ge=1, le=1000)],
+        q:str | None = None):
     return {"item_id": item_id, "q": q}
 
 @app.put("/items/{item_id}")
