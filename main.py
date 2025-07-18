@@ -2,6 +2,7 @@ import hashlib
 from typing import  Union, Annotated, Literal, Any
 from fastapi import FastAPI, Query, Path, Body, Cookie, Header, Form, File, UploadFile, HTTPException
 from fastapi.encoders import jsonable_encoder
+from fastapi.params import Depends
 from pydantic import BaseModel, AfterValidator, Field, HttpUrl
 from enum import Enum
 from uuid import UUID
@@ -299,3 +300,11 @@ async def update_item(item_id: str, item: Item):
     updated_item = stored_item_model.copy(update=update_data)
     items[item_id] = jsonable_encoder(updated_item)
     return updated_item
+
+
+async def common_patterns(q:str | None = None, skip:int = 0, limit:int=100):
+    return {"q": q, "skip": skip, "limit": limit}
+
+@app.get("/items_di/", tags=["items"])
+async def items_di(commons: Annotated[dict, Depends(common_patterns)] = None):
+    return commons
