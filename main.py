@@ -73,8 +73,10 @@ async def read_user_item(user_id: int, item_id: str, q:str = None, short: bool =
 
 class Item2(BaseModel):
     name: str
-    description: str
-    price: float
+    description: str | None = Field(
+        default=None,title = "The description of the item", max_length=300
+    )
+    price: float = Field(gt=0, description="The price must be greater than zero")
     tax: float | None = None
 
 @app.post("/items2/")
@@ -86,7 +88,9 @@ async  def create_item(item:Item2):
     return item_dict
 
 @app.put("/items2/{item_id}")
-async def update_item(item_id:int, item:Item2, q:str |None = None):
+async def update_item(
+        item_id:int,
+        item:Item2, q:str |None = None):
     result = {"item_id": item_id, **item.dict()}
     if q:
         result.update({"q": q})
