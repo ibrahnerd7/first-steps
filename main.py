@@ -183,9 +183,14 @@ async  def more_dts(
         duration: duration,
     }
 
+class Cookies(BaseModel):
+    model_config = {"extra":"forbid"}
+    session_id: str
+    fatebook_tracker: str | None = None
+    googall_tracker: str | None = None
 @app.get("/cookies/")
-async def read_cookies(ads_id: Annotated[str | None, Cookie()] = None):
-    return {"ads_id": ads_id}
+async def read_cookies(cookies: Annotated[Cookies, Cookie()] = None):
+    return cookies
 
 @app.get('/headers/')
 async def get_headers(user_agent: Annotated[str | None, Header(convert_underscores=False)] = None):
