@@ -1,4 +1,4 @@
-from typing import  Union, Annotated, Literal
+from typing import  Union, Annotated, Literal, Any
 from fastapi import  FastAPI, Query, Path, Body, Cookie, Header
 from pydantic import BaseModel, AfterValidator, Field, HttpUrl
 from enum import Enum
@@ -202,3 +202,18 @@ class CommonHeaders(BaseModel):
 @app.get('/headers/')
 async def get_headers(user_agent: Annotated[CommonHeaders, Header(convert_underscores=False)] = None):
     return {"User-Agent": user_agent}
+
+class UserIn(BaseModel):
+    username: str
+    password: str
+    email: str
+    full_name: str |  None = None
+
+class UserOut(BaseModel):
+    username: str
+    email: str
+    full_name: str | None = None
+
+@app.post("/users-io/", response_model=UserOut)
+async def create_user(user: UserIn) -> Any:
+    return user
