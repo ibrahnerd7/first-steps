@@ -241,3 +241,12 @@ async def create_user(user: UserIn) -> Any:
 @app.post("/login/", response_model=UserOut)
 async def login(username:Annotated[str, Form()], password:Annotated[str, Form()]):
     return {"username": username}
+
+class FormData(BaseModel):
+    username: str
+    password: str
+    model_config = {"extra":"forbid"}
+
+@app.post("/forms/")
+async def create_form(data: Annotated[FormData, Form()]):
+    return data
