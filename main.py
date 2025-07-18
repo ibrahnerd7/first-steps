@@ -40,7 +40,11 @@ def read_item(
     return {"item_id": item_id, "q": q}
 
 @app.put("/items/{item_id}")
-def update_item(item_id: int, item:Item, user: User, importance: Annotated[int, Body()]):
+def update_item(
+        item_id: int,
+        item:Item,
+        user: User,
+        importance: Annotated[int, Body(example=['One', 'Two', 'Three', 'Four'])],):
     return {"item_name": item.price, "item_id": item_id, "user": user, "importance": importance}
 
 @app.get("/files/{file_path}")
