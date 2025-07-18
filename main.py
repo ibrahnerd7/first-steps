@@ -1,6 +1,5 @@
 from typing import  Union, Annotated, Literal
-from fastapi import  FastAPI, Query, Path, Body
-from fastapi.params import Cookie
+from fastapi import  FastAPI, Query, Path, Body, Cookie, Header
 from pydantic import BaseModel, AfterValidator, Field, HttpUrl
 from enum import Enum
 from uuid import UUID
@@ -187,3 +186,7 @@ async  def more_dts(
 @app.get("/cookies/")
 async def read_cookies(ads_id: Annotated[str | None, Cookie()] = None):
     return {"ads_id": ads_id}
+
+@app.get('/headers/')
+async def get_headers(user_agent: Annotated[str | None, Header(convert_underscores=False)] = None):
+    return {"User-Agent": user_agent}
