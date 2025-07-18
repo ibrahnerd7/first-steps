@@ -1,6 +1,6 @@
 import hashlib
 from typing import  Union, Annotated, Literal, Any
-from fastapi import  FastAPI, Query, Path, Body, Cookie, Header,Form, File, UploadFile
+from fastapi import FastAPI, Query, Path, Body, Cookie, Header, Form, File, UploadFile, HTTPException
 from pydantic import BaseModel, AfterValidator, Field, HttpUrl
 from enum import Enum
 from uuid import UUID
@@ -41,6 +41,8 @@ async def get_model(model_name: ModelName):
 def read_item(
         item_id: Annotated[int, Path(title="The ID of the item to get", ge=1, le=1000)],
         q:str | None = None):
+    if item_id is None:
+        raise HTTPException(status_code=404, detail="Item not found", headers={"X-Error": "There goes my error"})
     return {"item_id": item_id, "q": q}
 
 @app.put("/items/{item_id}")
