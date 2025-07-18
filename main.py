@@ -1,6 +1,6 @@
 import hashlib
 from typing import  Union, Annotated, Literal, Any
-from fastapi import  FastAPI, Query, Path, Body, Cookie, Header,Form
+from fastapi import  FastAPI, Query, Path, Body, Cookie, Header,Form, File, UploadFile
 from pydantic import BaseModel, AfterValidator, Field, HttpUrl
 from enum import Enum
 from uuid import UUID
@@ -250,3 +250,24 @@ class FormData(BaseModel):
 @app.post("/forms/")
 async def create_form(data: Annotated[FormData, Form()]):
     return data
+
+@app.post("/files/")
+async def create_file(file: Annotated[bytes, File()]):
+    return {"file_size": len(file)}
+
+@app.post("/uploadfile/")
+async def create_upload_file(file: Annotated[bytes, File(description="A file read as UploadFile")]):
+    return {"file_size": file.filename}
+
+
+@app.post("/upload-files-1")
+async def create_file(
+        file: Annotated[bytes, File(description="A file read as UploadFile")],
+        fileb: Annotated[bytes, File()] = Body(None),
+        token: Annotated[str, Form()] = Body(None),
+):
+    return {
+        "file_size": len(file),
+        "token": token,
+        "fileb_content_type": fileb.content_type,
+    }
