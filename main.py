@@ -192,6 +192,13 @@ class Cookies(BaseModel):
 async def read_cookies(cookies: Annotated[Cookies, Cookie()] = None):
     return cookies
 
+class CommonHeaders(BaseModel):
+    model_config = {"extra":"forbid"}
+    host: str
+    save_data: bool
+    if_modified_since: str | None = None
+    traceparent: str | None = None
+    x_tag: list[str] = []
 @app.get('/headers/')
-async def get_headers(user_agent: Annotated[str | None, Header(convert_underscores=False)] = None):
+async def get_headers(user_agent: Annotated[CommonHeaders, Header(convert_underscores=False)] = None):
     return {"User-Agent": user_agent}
