@@ -1,6 +1,6 @@
 from typing import  Union, Annotated, Literal
 from fastapi import  FastAPI, Query, Path, Body
-from pydantic import BaseModel, AfterValidator, Field
+from pydantic import BaseModel, AfterValidator, Field, HttpUrl
 from enum import Enum
 
 from pygments.lexers import q
@@ -71,6 +71,10 @@ async def read_user_item(user_id: int, item_id: str, q:str = None, short: bool =
         item.update({"description": "This is an amazing item that has a long description"})
     return item
 
+class Image(BaseModel):
+    url: HttpUrl
+    name: str
+
 class Item2(BaseModel):
     name: str
     description: str | None = Field(
@@ -78,7 +82,26 @@ class Item2(BaseModel):
     )
     price: float = Field(gt=0, description="The price must be greater than zero")
     tax: float | None = None
+    tags: set[str] = set()
+    images: list[Image] | None = None
 
+class Offer(BaseModel):
+    name: str
+    description: str | None = None
+    price: float
+    items: list[Item2]
+
+@app.post("/offers")
+async def create_offer(offer: Offer):
+    return offer
+
+@app.post("/offers/{item_id}")
+async def create_multiple_images(images: list[Image]):
+    return images
+
+@app.post("/index-weights")
+async  def create_index_weights(weights: dict[int, float]):
+    return weights
 @app.post("/items2/")
 async  def create_item(item:Item2):
     item_dict = item.model_dump()
@@ -124,7 +147,7 @@ async def read_books(
     return {"id": id, "item": item}
 
 class FilterParams(BaseModel):
-    model_config = {"etra", "forbid"}
+    # model_config = {"etra", "forbid"}
     limit: int = Field(100, gt=0, le=100)
     offset: int = Field(0, gt=0)
     order_by: Literal["price", "name"]
