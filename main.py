@@ -1,6 +1,6 @@
 import hashlib
 from typing import  Union, Annotated, Literal, Any
-from fastapi import  FastAPI, Query, Path, Body, Cookie, Header
+from fastapi import  FastAPI, Query, Path, Body, Cookie, Header,Form
 from pydantic import BaseModel, AfterValidator, Field, HttpUrl
 from enum import Enum
 from uuid import UUID
@@ -237,3 +237,7 @@ def create_fake_user(user_in):
 @app.post("/users-io/", response_model=UserOut)
 async def create_user(user: UserIn) -> Any:
     return user
+
+@app.post("/login/", response_model=UserOut)
+async def login(username:Annotated[str, Form()], password:Annotated[str, Form()]):
+    return {"username": username}
