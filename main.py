@@ -25,6 +25,10 @@ class ModelName(str, Enum):
     resnet = "resnet"
     lenet = "lenet"
 
+class Tags(Enum):
+    items = "items"
+    users = "users"
+
 @app.get("/")
 def read_root():
     return {"Hello": "World"}
@@ -37,7 +41,7 @@ async def get_model(model_name: ModelName):
         return {"model_name": model_name , "message": "LeCNN all the images"}
     return {"model_name": model_name , "message": "Have some residuals"}
 
-@app.get("/items/{item_id}")
+@app.get("/items/{item_id}", tags=[Tags.items], summary="Get an item by id")
 def read_item(
         item_id: Annotated[int, Path(title="The ID of the item to get", ge=1, le=1000)],
         q:str | None = None):
@@ -45,7 +49,7 @@ def read_item(
         raise HTTPException(status_code=404, detail="Item not found", headers={"X-Error": "There goes my error"})
     return {"item_id": item_id, "q": q}
 
-@app.put("/items/{item_id}")
+@app.put("/items/{item_id}", tags=[Tags.items], summary="Update an item by id", deprecated=True)
 def update_item(
         item_id: int,
         item:Item,
@@ -146,7 +150,7 @@ def check_is_valid_id(id: str):
         raise ValueError('Invalid ID format, it must start with "isbn-" or "imdb-"')
     return id
 
-@app.get("/books")
+@app.get("/books", tags=["books"])
 async def read_books(
         id: Annotated[str | None,AfterValidator(check_is_valid_id)] = None,
 ):
@@ -191,7 +195,7 @@ class Cookies(BaseModel):
     session_id: str
     fatebook_tracker: str | None = None
     googall_tracker: str | None = None
-@app.get("/cookies/")
+@app.get("/cookies/", tags=["cookies"])
 async def read_cookies(cookies: Annotated[Cookies, Cookie()] = None):
     return cookies
 
@@ -249,7 +253,7 @@ class FormData(BaseModel):
     password: str
     model_config = {"extra":"forbid"}
 
-@app.post("/forms/")
+@app.post("/forms/", tags=["forms"])
 async def create_form(data: Annotated[FormData, Form()]):
     return data
 
@@ -262,14 +266,14 @@ async def create_upload_file(file: Annotated[bytes, File(description="A file rea
     return {"file_size": file.filename}
 
 
-@app.post("/upload-files-1")
-async def create_file(
-        file: Annotated[bytes, File(description="A file read as UploadFile")],
-        fileb: Annotated[bytes, File()] = Body(None),
-        token: Annotated[str, Form()] = Body(None),
-):
-    return {
-        "file_size": len(file),
-        "token": token,
-        "fileb_content_type": fileb.content_type,
-    }
+# @app.post("/upload_files_files")
+# async def create_file(
+#         file: Annotated[bytes, File(description="A file read as UploadFile")],
+#         fileb: Annotated[bytes, File()] = Body(None),
+#         token: Annotated[str, Form()] = Body(None),
+# ):
+#     return {
+#         "file_size": len(file),
+#         "token": token,
+#         "fileb_content_type": fileb.content_type,
+#     }
