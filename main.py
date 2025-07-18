@@ -3,6 +3,7 @@ from typing import  Union, Annotated, Literal, Any
 from fastapi import FastAPI, Query, Path, Body, Cookie, Header, Form, File, UploadFile, HTTPException
 from fastapi.encoders import jsonable_encoder
 from fastapi.params import Depends
+from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel, AfterValidator, Field, HttpUrl
 from enum import Enum
 from uuid import UUID
@@ -134,6 +135,12 @@ async def update_item(
     if q:
         result.update({"q": q})
     return result
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
+@app.get("/itemsxyz")
+async def read_items_xyz(token: Annotated[str, Depends(oauth2_scheme)]):
+    return {"token": token}
 
 @app.get("/items3/")
 async def read_items(q: Annotated[str |None, Query(min_length=3,max_length=50, pattern="^fixedquery$")] ):
@@ -308,3 +315,24 @@ async def common_patterns(q:str | None = None, skip:int = 0, limit:int=100):
 @app.get("/items_di/", tags=["items"])
 async def items_di(commons: Annotated[dict, Depends(common_patterns)] = None):
     return commons
+
+class UserB(BaseModel):
+    username: str
+    email: str
+    full_name: str | None = None
+    disabled: bool | None = None
+
+def fake_decode_token(token):
+    return UserB(
+        username= token + "fakedecoded",
+        email="john@example.com",
+        full_name="John Doe"
+    )
+
+async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
+    user = fake_decode_token(token)
+    return user
+
+@app.get("/users/me", tags=["items"])
+async def read_users_me(current_user: Annotated[User, Depends(get_current_user)]):
+    return current_user
